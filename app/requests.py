@@ -1,106 +1,105 @@
-import urllib.request,json
-from .models import Headlines,Sources
+import urllib.request
+import json
+from .models import Sources, Headlines
+
 
 # Getting api key
 api_key = None
 
-#Getting Sources base url
-base_url=None
+# Getting the base urls
+base_url = None
+headline_base_url = None
 
-#Getting Articles base url
-article_base_url = None
 
-def configure_request(app):
-    global api_key,base_url,articles_base_url
-    api_key = app.config['NEWS_API_KEY']
-    base_url = app.config['NEWS_API_BASE_URL']
-    articles_base_url = app.config['ARTICLES_API_BASE_URL']
 
-def get_Sources(category):
+def configue_request(app):
+    global api_key,base_url,headline_base_url
+
+    api_key=app.config['API_KEY']
+    base_url = app.config['SOURCE_BASE_URL']
+    headline_base_url=app.config['HEADLINES_BASE_URL']
+
+
+
+def get_sources(category):
     '''
-    Function that gets the json response to our url request
+    a function that returns sources with category passed in as a parameter
     '''
-    get_sources_url = base_url.format(category,api_key)
+    full_url = base_url.format(category,api_key)
+    with urllib.request.urlopen(full_url) as url:
+        source_data = url.read()
+        json_source_data = json.loads(source_data)
+        # print(json_source_data)
 
-    with urllib.request.urlopen(get_sources_url) as url:
-        get_sources_data = url.read()
-        get_sources_response = json.loads(get_sources_data)
+        source_list = None
 
-        sources_results = None
+        if json_source_data['sources']:
+            json_lib = json_source_data['sources']
+            source_list = process_sources(json_lib)
 
-        if get_sources_response['results']:
-            sources_results_list = get_sources_response['sources']
-            sources_results = process_results(sources_results_list)
+    return source_list
 
 
-    return sources_results
-
-
-def process_results(sources_list):
+def process_sources(sources):
     '''
-    Function  that processes the sources result and transform them to a list of Objects
-
-    Args:
-        sources_list: A list of dictionaries that contain sources details
-
-    Returns :
-        sources_results: A list of sources objects
+    an 'interface' that filters data and inserts it into a class
     '''
-    sources_results = []
-    for sources_item in sources_list:
-        id = sources_item.get('id')
-        name = sources_item.get('original_name')
-        description = movie_item.get('description')
-        url = sources_item.get('url')
-        category = sources_item.get('category')
-        language = sources_item.get('language')
+    source_list = []
+    for one_source in sources:
+        id = one_source.get('id')
+        name = one_source.get('name')
+        desc = one_source.get('description')
+        url = one_source.get('url')
+        category = one_source.get('category')
+        country = one_source.get('country')
+       
 
-        if poster:
-            sources_object = sources(id,name,description,url,category,language)
-            sources_results.append(sources_object)
+        data_sources = Sources(id,name,desc,url,category,country)
+        source_list.append(data_sources)
+        # print('full_headlines_url')
 
-    return sources_results
-
-def get_article(id):
-    get_article_url = headlines_base_url.format(id, api_key)
-
-    with urllib.request.urlopen(get_article_url) as url:
-       get_article_data = url.read()
-       get_article_response = json.loads(get_article_data)
-
-       article_results = None
-
-       if get_article_response['articles']:
-           article_results_list = get_article_response['articles']
-           article_results=process_article_results(article_results_list)
-    
-    return article_results
+    return source_list
 
 
-def process_article_results(article_list):
-    """
-    Function  that processes the articles result and transform them to a list of Objects
-    Args:
-        article_list: A list of dictionaries that contain articles details
-    Returns :
-        article_results: A list of source objects
-    """
+def get_articles(id):
+    '''
+    a function that returns article_list irrespective of their category
+    '''
+    print('full_headlines_url')
+    full_headlines_url = headline_base_url.format(id, api_key)
 
-    article_results = []
-    for article_item in article_list:
-        id = article_item.get('id')
-        author = article_item.get('author')
-        title = article_item.get('title')
-        description = article_item.get('description')
-        url = article_item.get('url')
-        urlToImage = article_item.get('urlToImage')
-        publishedAt = article_item.get('publishedAt')
-        content = article_item.get('content')
+    with urllib.request.urlopen(full_headlines_url) as url:
+        articles = url.read()
+        json_articles = json.loads(articles)
+        print(json_articles)
 
-        if urlToImage:
-            article_object = Articles(id, author, title, description, url, urlToImage, publishedAt, content)
-            article_results.append(article_object)
+        articles_list = None
 
-    return article_results
+        if json_articles['articles']:
+            article_lib = json_articles['articles']
+            articles_list = process_articles(article_lib)
 
-            
+    return articles_list
+
+
+def process_articles(articles):
+    '''
+    this function acr=ts an an interfacce for data brought back by the api url as it pushes relevant data into our class and irrellevant data is left out
+    '''
+    articles_list = []
+    for article in articles:
+        name = article.get('name')
+        author = article.get('author')
+        title = article.get('title')
+        description = article.get('description')
+        url = article.get('url')
+        urlToImage = article.get('urlToImage')
+        publishedAt = article.get('publishedAt')
+        content = article.get('content')
+
+        article_data = Headlines(
+            name,author, title, description, url, urlToImage, publishedAt,content)
+
+        articles_list.append(article_data)
+
+    return articles_list
