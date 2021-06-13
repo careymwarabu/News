@@ -3,14 +3,17 @@
 <div class='col-md-3 '>
     <div class='panel panel-default'>
         <div class="panel-header">
-            <h3 class="text-info">{{source.name}}</h3>
+            <h3 class="text-danger text-center">{{source.name}}</h3>
+            <hr>
+
         </div>
         <div class="panel-body">
             <p>{{source.desc}}</p>
+            <hr>
         </div>
-        <div class="pane-footer">
+        <div class="panel-footer p-3">
             <a href="/news/{{source.id}}">
-                <button class="btn btn-primary">
+                <button class="btn btn-danger">
                     HEADLINES
                 </button>
             </a>
