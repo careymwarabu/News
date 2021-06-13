@@ -1,3 +1,4 @@
+
 import urllib.request
 import json
 from .models import Sources, Headlines
@@ -12,7 +13,7 @@ headline_base_url = None
 
 
 
-def configue_request(app):
+def configure_request(app):
     global api_key,base_url,headline_base_url
 
     api_key=app.config['API_KEY']
@@ -50,11 +51,10 @@ def process_sources(sources):
         name = one_source.get('name')
         desc = one_source.get('description')
         url = one_source.get('url')
-        category = one_source.get('category')
         country = one_source.get('country')
        
 
-        data_sources = Sources(id,name,desc,url,category,country)
+        data_sources = Sources(id,name,desc,url,country)
         source_list.append(data_sources)
         # print('full_headlines_url')
 
@@ -88,17 +88,15 @@ def process_articles(articles):
     '''
     articles_list = []
     for article in articles:
-        name = article.get('name')
         author = article.get('author')
         title = article.get('title')
         description = article.get('description')
         url = article.get('url')
         urlToImage = article.get('urlToImage')
         publishedAt = article.get('publishedAt')
-        content = article.get('content')
 
         article_data = Headlines(
-            name,author, title, description, url, urlToImage, publishedAt,content)
+            author, title, description, url, urlToImage, publishedAt)
 
         articles_list.append(article_data)
 
